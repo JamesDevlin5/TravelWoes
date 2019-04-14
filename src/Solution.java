@@ -15,7 +15,7 @@ class Solution {
      * src in V, dst in V
      */
     private int nodes, edges;
-    private int[][] routes;
+    private ConsList[] routes;
     private int orig, target;
     
     /**
@@ -29,17 +29,17 @@ class Solution {
         // The first line of arguments
         this.nodes = input.nextInt(); // |V|
         this.edges = input.nextInt(); // |E|
-        this.routes = new int[this.nodes][3];
+        this.routes = new ConsList[this.nodes];
         // The following |routes| lines of arguments, describing each route
         for (int i = 0; i < this.nodes; i++) {
-            this.routes[i] = new int[3];
-            this.routes[i][0] = input.nextInt(); // src
-            this.routes[i][1] = input.nextInt(); // dst
-            this.routes[i][2] = input.nextInt(); // cost
+            int src = input.nextInt() - 1;
+            int dst = input.nextInt() - 1;
+            int cost = input.nextInt();
+            this.routes[src] = new ConsList(dst, cost, this.routes[src]);
         }
         // The final line of arguments, describing the goal
-        this.orig = input.nextInt();
-        this.target = input.nextInt();
+        this.orig = input.nextInt() - 1;
+        this.target = input.nextInt() - 1;
     }
     
     /**
@@ -58,6 +58,80 @@ class Solution {
      */
     public int shortestPath() {
         return 0;
+    }
+
+    private ConsList[] adjacencyList = new ConsList[this.nodes];
+
+    public void addEdge(ConsList[] adjacencyList, int u, int v, int w) {
+        this.adjacencyList[u] = new ConsList(v, w, this.adjacencyList[u]);
+    }
+
+    private class ConsList {
+        int vertex, weight;
+        ConsList rest;
+
+        public ConsList(int v, int w, ConsList r) {
+            this.vertex = v;
+            this.weight = w;
+            this.rest = r;
+        }
+    }
+
+    private class MinHeap {
+        int[] heap, key, pos;
+        int allocatedSize, heapSize;
+
+        public MinHeap(int size) {
+            this.heap = new int[size];
+            this.key = new int[size];
+            this.pos = new int[size];
+            this.allocatedSize = size;
+            this.heapSize = size - 1;
+        }
+
+        public int size() {
+            return this.heapSize;
+        }
+
+        public int getKey(int key) {
+            return this.key[key];
+        }
+
+        private void swap(int a, int b) {
+            this.pos[this.heap[a]] = b;
+            this.pos[this.heap[b]] = a;
+            int temp = this.heap[b];
+            this.heap[b] = this.heap[a];
+            this.heap[a] = temp;
+        }
+
+        public void initHeap(int source) {
+            for (int i = 0; i < this.heapSize; i++) {
+                this.heap[i] = i;
+                this.pos[i] = i;
+                this.key[i] = 10000000;
+            }
+            this.key[source] = 0;
+            this.swap(0, source);
+        }
+
+        public int extractMin() {
+            int res = this.heap[0];
+            this.swap(0, heapSize);
+            this.heapSize--;
+            this.bubbleDown(0);
+            return res;
+        }
+
+        public boolean decreaseKey(int u, int v, int w) {
+            int newKey = this.key[u] + w;
+            if (this.key[v] > newKey) {
+                this.key[v] = newKey;
+                this.bubbleUp(this.pos[v]);
+                return true;
+            }
+            return false;
+        }
     }
 
     /**
