@@ -1,4 +1,4 @@
 
 # CS 3000 Programming Challenge: Travel Woes
 
-[URL](https://www.hackerrank.com/tests/jqnk41r6cg/questions/1tfistg3tkg)
+[URL](http://hr.gs/CS3000Spring2019)
