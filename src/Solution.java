@@ -32,6 +32,7 @@ class Solution {
         this.routes = new int[this.nodes][3];
         // The following |routes| lines of arguments, describing each route
         for (int i = 0; i < this.nodes; i++) {
+            this.routes[i] = new int[3];
             this.routes[i][0] = input.nextInt(); // src
             this.routes[i][1] = input.nextInt(); // dst
             this.routes[i][2] = input.nextInt(); // cost
@@ -57,6 +58,19 @@ class Solution {
      */
     public int shortestPath() {
         return 0;
+    }
+
+    /**
+     * Swaps two arrays in a 2-dimensional array of integers
+     *
+     * @param matrix The matrix of numbers to act on
+     * @param index0 The index of the first item to swap
+     * @param index1 The index of the second item to swap
+     */
+    public static void swap(int[][] matrix, int index0, int index1) {
+        int[] temp = matrix[index0];
+        matrix[index0] = matrix[index1];
+        matrix[index1] = temp;
     }
     
 }
