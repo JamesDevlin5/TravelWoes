@@ -1,0 +1,32 @@
+
+
+##~~~~~~~~~~~~~~~~~~~~~~##
+## Java Git Ignore File ##
+##~~~~~~~~~~~~~~~~~~~~~~##
+
+# Compiled Files
+*.class
+
+# Log Files
+*.log
+
+# Package Files
+*.jar
+*.zip
+*.tar.gz
+
+# Virtual Machine Crash Logs
+hs_err_pid*
+
+
+
+## IntelliJ ##
+*.iml
+.idea/
+*.ipr
+*.iws
+out/
+.idea_modules/
+
+## Mac OS X ##
+.DS_Store
