@@ -59,24 +59,56 @@ class Solution {
     public int shortestPath() {
         return 0;
     }
-
-    private ConsList[] adjacencyList = new ConsList[this.nodes];
-
+    
+    /**
+     * Appends an edge with the specified end nodes and weight to the cons list provided
+     *
+     * @param adjacencyList The cons list representing the adjacency list of every node
+     * @param u The start vertex of the edge
+     * @param v The destination vertex of the edge
+     * @param w The weight of the edge
+     */
     public void addEdge(ConsList[] adjacencyList, int u, int v, int w) {
-        this.adjacencyList[u] = new ConsList(v, w, this.adjacencyList[u]);
+        adjacencyList[u] = new ConsList(v, w, adjacencyList[u]);
     }
-
+    
+    /**
+     * A class to represent a linked list, where each node has a vertex and the associated cost of travel, along with
+     * a pointer or link to the rest of the list
+     */
     private class ConsList {
-        int vertex, weight;
+        /**
+         * The contained information, the vertex and associated weight,
+         * along with a link to the rest of the list
+         */
+        final int vertex, weight;
         ConsList rest;
-
+    
+        /**
+         * Constructs a node in a cons list with the specified vertex and weight
+         *
+         * @param v The vertex this node encapsulates
+         * @param w The cost of the edge to this vertex
+         * @param r The rest of the cons list which this is being appended to
+         */
         public ConsList(int v, int w, ConsList r) {
             this.vertex = v;
             this.weight = w;
             this.rest = r;
         }
     }
-
+    
+    /**
+     * Represents a minimum heap data structure with the following properties:
+     * - All levels prior to the last are completely filled, and the last level is filled to the left
+     * - The key at the root is minimum among all keys present in the heap, which is recursively true for all nodes
+     *
+     * The elements are accessible via:
+     * - Root Element (Min): arr[0]
+     * - Parent node of i-th node: arr[(i-1)/2]
+     * - Left child node of i-th node: arr[(2*i)+1]
+     * - Right child node of i-th node: arr[(2*i)+2]
+     */
     private class MinHeap {
         int[] heap, key, pos;
         int allocatedSize, heapSize;
@@ -88,15 +120,32 @@ class Solution {
             this.allocatedSize = size;
             this.heapSize = size - 1;
         }
-
+    
+        /**
+         * Getter for the number of elements contained in the heap
+         *
+         * @return The number of items remaining in the heap
+         */
         public int size() {
             return this.heapSize;
         }
-
+    
+        /**
+         * Getter for the value of the key specified
+         *
+         * @param key The vertex integer of the key to extract
+         * @return The key associated with the vertex indicated
+         */
         public int getKey(int key) {
             return this.key[key];
         }
-
+    
+        /**
+         * Swaps the items in the heap at index a and b
+         *
+         * @param a The index of the first element to swap
+         * @param b The index of the second element to swap
+         */
         private void swap(int a, int b) {
             this.pos[this.heap[a]] = b;
             this.pos[this.heap[b]] = a;
@@ -104,7 +153,13 @@ class Solution {
             this.heap[b] = this.heap[a];
             this.heap[a] = temp;
         }
-
+    
+        /**
+         * Initializes the heap such that each vertex is included once, with the maximum value excluding
+         * the source which is assigned a weight of 0, so it is chosen first
+         *
+         * @param source The integer indication of the vertex to start with
+         */
         public void initHeap(int source) {
             for (int i = 0; i < this.heapSize; i++) {
                 this.heap[i] = i;
@@ -114,7 +169,12 @@ class Solution {
             this.key[source] = 0;
             this.swap(0, source);
         }
-
+    
+        /**
+         * Extracts the minimum key from the heap and returns it, while maintaining the required structure of the heap
+         *
+         * @return The current minimum key removed from the heap
+         */
         public int extractMin() {
             int res = this.heap[0];
             this.swap(0, heapSize);
@@ -122,7 +182,15 @@ class Solution {
             this.bubbleDown(0);
             return res;
         }
-
+    
+        /**
+         * Updates the key value associated with some vertex to be the new, provided key
+         *
+         * @param u The source vertex
+         * @param v The adjacent vertex being examined
+         * @param w The new weight to the adjacent vertex
+         * @return True if the key of the adjacent vertex was decreased, false otherwise
+         */
         public boolean decreaseKey(int u, int v, int w) {
             int newKey = this.key[u] + w;
             if (this.key[v] > newKey) {
