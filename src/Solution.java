@@ -1,5 +1,4 @@
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Scanner;
 
 /**
@@ -7,16 +6,29 @@ import java.util.Scanner;
  */
 class Solution {
     
+    /**
+     * The various properties of the graph that are given as input:
+     * <p>
+     * V = {i|i in [1, nodes]}, |E|,
+     * for i := 1 ... |E|:
+     *      E[i] = {(source node, dest node, edge cost)},
+     * src in V, dst in V
+     */
     private int nodes, edges;
     private int[][] routes;
     private int orig, target;
     
-    public Solution(InputStream inputStream, OutputStream outputStream) {
+    /**
+     * The solutions object constructor, which extracts the input from the provided input stream
+     *
+     * @param inputStream The input stream containing a description of the graph and the constraints
+     */
+    public Solution(InputStream inputStream) {
         // The scanner to use to read input
-        Scanner input = new Scanner(inputStream);
+        Scanner input = new Scanner(inputStream).skip("\n");
         // The first line of arguments
-        this.nodes = input.nextInt();
-        this.edges = input.nextInt();
+        this.nodes = input.nextInt(); // |V|
+        this.edges = input.nextInt(); // |E|
         this.routes = new int[this.nodes][3];
         // The following |routes| lines of arguments, describing each route
         for (int i = 0; i < this.nodes; i++) {
@@ -35,6 +47,16 @@ class Solution {
      * @param args The provided command line arguments, assumed to be none for this project
      */
     public static void main(String[] args) {
+        System.out.print(new Solution(System.in).shortestPath());
+    }
+    
+    /**
+     * Examines the graph specified in the constructor, to extract the minimum weight path
+     *
+     * @return The cost of the minimum path between source and target
+     */
+    public int shortestPath() {
+        return 0;
     }
     
 }
