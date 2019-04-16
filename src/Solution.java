@@ -14,33 +14,12 @@ class Solution {
      *      E[i] = {(source node, dest node, edge cost)},
      * src in V, dst in V
      */
-    private int nodes, edges;
-    private ConsList[] routes;
-    private int orig, target;
-    
-    /**
-     * The solutions object constructor, which extracts the input from the provided input stream
-     *
-     * @param inputStream The input stream containing a description of the graph and the constraints
-     */
-    public Solution(InputStream inputStream) {
-        // The scanner to use to read input
-        Scanner input = new Scanner(inputStream).skip("\n");
-        // The first line of arguments
-        this.nodes = input.nextInt(); // |V|
-        this.edges = input.nextInt(); // |E|
-        this.routes = new ConsList[this.nodes];
-        // The following |routes| lines of arguments, describing each route
-        for (int i = 0; i < this.nodes; i++) {
-            int src = input.nextInt() - 1;
-            int dst = input.nextInt() - 1;
-            int cost = input.nextInt();
-            this.routes[src] = new ConsList(dst, cost, this.routes[src]);
-        }
-        // The final line of arguments, describing the goal
-        this.orig = input.nextInt() - 1;
-        this.target = input.nextInt() - 1;
-    }
+    private int numV;
+    private int numE;
+    private ConsList[] adjacencyList;
+    private int source;
+    private int target;
+    private MinHeap heap;
     
     /**
      * The main method which runs the entire program
@@ -48,7 +27,7 @@ class Solution {
      * @param args The provided command line arguments, assumed to be none for this project
      */
     public static void main(String[] args) {
-        System.out.print(new Solution(System.in).shortestPath());
+        System.out.print(new Solution().shortestPath());
     }
     
     /**
@@ -56,8 +35,32 @@ class Solution {
      *
      * @return The cost of the minimum path between source and target
      */
-    public int shortestPath() {
-        return 0;
+    int shortestPath() {
+        // Initialize the heap
+        this.heap = new MinHeap(this.numV);
+        this.heap.initHeap(this.source);
+        // Iterate over all nodes in the heap
+        while (this.heap.size() > 0) {
+            // Extract the next lowest-cost reachable vertex
+            int nextVert = this.heap.extractMin();
+            // Ensure that the vertex is reachable
+            if (this.heap.getKey(nextVert) >= 10000000) {
+                return -1;
+            }
+            // Check to see if the vertex is the target
+            else if (nextVert == this.target) {
+                return this.heap.getKey(nextVert);
+            }
+            // Update all neighboring vertices of the new vertex
+            else {
+                ConsList neighborList = this.adjacencyList[nextVert];
+                while (neighborList != null) {
+                    this.heap.updateKey(nextVert, neighborList.getVertex(), neighborList.getWeight());
+                    neighborList = neighborList.getRest();
+                }
+            }
+        }
+        return -1;
     }
     
     /**
@@ -68,22 +71,47 @@ class Solution {
      * @param v The destination vertex of the edge
      * @param w The weight of the edge
      */
-    public void addEdge(ConsList[] adjacencyList, int u, int v, int w) {
+    void addEdge(ConsList[] adjacencyList, int u, int v, int w) {
         adjacencyList[u] = new ConsList(v, w, adjacencyList[u]);
+    }
+    
+    /**
+     * Parses the input from the input stream to extract the representation of the graph
+     *
+     * @param inputStream The input stream containing graph's description
+     */
+    void parseInput(InputStream inputStream) {
+        // The scanner to use to read input
+        Scanner input = new Scanner(inputStream);
+        // The first line of arguments
+        this.numV = input.nextInt(); // |V|
+        this.numE = input.nextInt(); // |E|
+        this.adjacencyList = new ConsList[this.numV + 1];
+        // The following |routes| lines of arguments, describing each route
+        for (int i = 0; i < this.numE; i++) {
+            int src = input.skip("\n").nextInt();
+            int dst = input.nextInt();
+            int cost = input.nextInt();
+            this.addEdge(this.adjacencyList, src, dst, cost);
+        }
+        // The final line of arguments, describing the goal
+        this.source = input.skip("\n").nextInt();
+        this.target = input.nextInt();
     }
     
     /**
      * A class to represent a linked list, where each node has a vertex and the associated cost of travel, along with
      * a pointer or link to the rest of the list
      */
-    private class ConsList {
+    class ConsList {
         /**
          * The contained information, the vertex and associated weight,
          * along with a link to the rest of the list
          */
-        final int vertex, weight;
-        ConsList rest;
-    
+        private final int vertex;
+        private final int weight;
+        private final ConsList rest;
+        
         /**
          * Constructs a node in a cons list with the specified vertex and weight
          *
@@ -91,10 +119,37 @@ class Solution {
          * @param w The cost of the edge to this vertex
          * @param r The rest of the cons list which this is being appended to
          */
-        public ConsList(int v, int w, ConsList r) {
+        ConsList(int v, int w, ConsList r) {
             this.vertex = v;
             this.weight = w;
             this.rest = r;
+        }
+        
+        /**
+         * Getter for the vertex associated with this node
+         *
+         * @return The integer representation of the vertex contained
+         */
+        int getVertex() {
+            return this.vertex;
+        }
+        
+        /**
+         * Getter for the weight associated with traversal to this node
+         *
+         * @return The weight to travel to the vertex contained
+         */
+        int getWeight() {
+            return this.weight;
+        }
+        
+        /**
+         * Getter for the node containing the next link in the list
+         *
+         * @return The next node in the cons list
+         */
+        ConsList getRest() {
+            return this.rest;
         }
     }
     
@@ -102,117 +157,169 @@ class Solution {
      * Represents a minimum heap data structure with the following properties:
      * - All levels prior to the last are completely filled, and the last level is filled to the left
      * - The key at the root is minimum among all keys present in the heap, which is recursively true for all nodes
-     *
+     * <p>
      * The elements are accessible via:
      * - Root Element (Min): arr[0]
      * - Parent node of i-th node: arr[(i-1)/2]
      * - Left child node of i-th node: arr[(2*i)+1]
      * - Right child node of i-th node: arr[(2*i)+2]
      */
-    private class MinHeap {
-        int[] heap, key, pos;
-        int allocatedSize, heapSize;
-
-        public MinHeap(int size) {
-            this.heap = new int[size];
-            this.key = new int[size];
-            this.pos = new int[size];
-            this.allocatedSize = size;
-            this.heapSize = size - 1;
-        }
-    
+    public class MinHeap {
+        
+        // heap[i] = position in heap (i) -> vertex
+        private int[] heap;
+        // key[i] = vertex (i) -> minimum cost path
+        private int[] key;
+        // pos[i] = vertex (i) -> position in heap
+        private int[] pos;
+        // The number of elements currently stored in the heap
+        private int heapSize;
+        
         /**
-         * Getter for the number of elements contained in the heap
+         * Constructs a new minimum heap with the provided number of elements specified
          *
-         * @return The number of items remaining in the heap
+         * @param size The number of elements to initialize data structures for
          */
-        public int size() {
+        MinHeap(int size) {
+            // Ensure that the integer arrays may all store |V| values
+            this.heap = new int[size + 1];
+            this.key = new int[size + 1];
+            this.pos = new int[size + 1];
+            // There are |V| nodes in the heap, initially
+            this.heapSize = size;
+        }
+        
+        /**
+         * Getter for the number of elements in the heap currently
+         *
+         * @return The heaps current size
+         */
+        int size() {
             return this.heapSize;
         }
-    
+        
         /**
          * Getter for the value of the key specified
          *
-         * @param key The vertex integer of the key to extract
-         * @return The key associated with the vertex indicated
-         */
-        public int getKey(int key) {
-            return this.key[key];
-        }
-    
-        /**
-         * Swaps the items in the heap at index a and b
+         * @param vertex The vertex integer who's key to extract
          *
-         * @param a The index of the first element to swap
-         * @param b The index of the second element to swap
+         * @return The key associated with the vertex provided
          */
-        private void swap(int a, int b) {
-            this.pos[this.heap[a]] = b;
-            this.pos[this.heap[b]] = a;
-            int temp = this.heap[b];
-            this.heap[b] = this.heap[a];
-            this.heap[a] = temp;
+        int getKey(int vertex) {
+            return this.key[vertex];
         }
-    
+        
         /**
-         * Initializes the heap such that each vertex is included once, with the maximum value excluding
-         * the source which is assigned a weight of 0, so it is chosen first
+         * Updates the current value of the key of the destination based on the new route provided
          *
-         * @param source The integer indication of the vertex to start with
-         */
-        public void initHeap(int source) {
-            for (int i = 0; i < this.heapSize; i++) {
-                this.heap[i] = i;
-                this.pos[i] = i;
-                this.key[i] = 10000000;
-            }
-            this.key[source] = 0;
-            this.swap(0, source);
-        }
-    
-        /**
-         * Extracts the minimum key from the heap and returns it, while maintaining the required structure of the heap
+         * @param src  The vertex for which a minimum route has been found
+         * @param dst  The vertex being examined, to determine if this route is the cheapest so far
+         * @param cost The cost of traversing from the src to the dst vertices
          *
-         * @return The current minimum key removed from the heap
+         * @return True if the key of the destination was updated, False otherwise
          */
-        public int extractMin() {
-            int res = this.heap[0];
-            this.swap(0, heapSize);
-            this.heapSize--;
-            this.bubbleDown(0);
-            return res;
-        }
-    
-        /**
-         * Updates the key value associated with some vertex to be the new, provided key
-         *
-         * @param u The source vertex
-         * @param v The adjacent vertex being examined
-         * @param w The new weight to the adjacent vertex
-         * @return True if the key of the adjacent vertex was decreased, false otherwise
-         */
-        public boolean decreaseKey(int u, int v, int w) {
-            int newKey = this.key[u] + w;
-            if (this.key[v] > newKey) {
-                this.key[v] = newKey;
-                this.bubbleUp(this.pos[v]);
+        boolean updateKey(int src, int dst, int cost) {
+            // Calculate the cost of the new key
+            int newKey = this.key[src] + cost;
+            // Check if the new route has a lower cost than the previous minimum
+            if (this.key[dst] > newKey) {
+                // Update the key of the vertex
+                this.key[dst] = newKey;
+                // Ensure that the vertex is in the correct position
+                this.bubbleUp(this.pos[dst]);
                 return true;
             }
+            // The key was not updated since a previous route is cheaper
             return false;
         }
-    }
-
-    /**
-     * Swaps two arrays in a 2-dimensional array of integers
-     *
-     * @param matrix The matrix of numbers to act on
-     * @param index0 The index of the first item to swap
-     * @param index1 The index of the second item to swap
-     */
-    public static void swap(int[][] matrix, int index0, int index1) {
-        int[] temp = matrix[index0];
-        matrix[index0] = matrix[index1];
-        matrix[index1] = temp;
+        
+        /**
+         * A utility function which bubbles a node up the heap
+         *
+         * @param position The position in the heap of the item to be bubbled up
+         */
+        private void bubbleUp(int position) {
+            while (position > 1 && this.getKey(this.heap[position]) < this.getKey(this.heap[position / 2])) {
+                this.swap(position, position / 2);
+                position = position / 2;
+            }
+        }
+        
+        /**
+         * Extracts the minimum value from the heap, indicating the cheapest next-vertex which may be routed
+         *
+         * @return The integer identity of the vertex with the next cheapest route
+         */
+        int extractMin() {
+            // The next minimum cost path will be the root node
+            int minVertex = this.heap[1];
+            // Swap the root node and the last leaf node
+            this.swap(1, this.heapSize);
+            // The node removed will now be out of scope
+            this.heapSize--;
+            // Ensure root node is now correct
+            this.bubbleDown(1);
+            return minVertex;
+        }
+        
+        /**
+         * A utility function which bubbles a node down the heap
+         *
+         * @param position The position in the heap of the item to be bubbled down
+         */
+        private void bubbleDown(int position) {
+            while (position * 2 <= this.size()) {
+                int minChild;
+                if (position * 2 < this.size()
+                            && this.key[this.heap[position * 2]] > this.key[this.heap[position * 2 + 1]]) {
+                    minChild = position * 2 + 1;
+                } else {
+                    minChild = position * 2;
+                }
+                if (this.key[this.heap[position]] > this.key[this.heap[minChild]]) {
+                    this.swap(position, minChild);
+                    position = minChild;
+                } else {
+                    break;
+                }
+            }
+        }
+        
+        /**
+         * Initializes the heap to prepare for extracting the minimum cost path from the provided source vertex
+         *
+         * @param source The source vertex to analyze initially
+         */
+        void initHeap(int source) {
+            // Iterate all vertices
+            for (int i = 1; i <= this.heapSize; i++) {
+                // vertex i is located a position i for all vertices, initially
+                this.heap[i] = i;
+                this.pos[i] = i;
+                // All vertices have the maximum possible key, initially
+                this.key[i] = 10000000;
+            }
+            // The source should be selected initially, with a weight of 0
+            this.key[source] = 0;
+            // Ensure that the source is in the correct position
+            this.swap(1, source);
+        }
+        
+        /**
+         * Swaps two items in the heap to facilitate bubbling items up or down
+         *
+         * @param index0 The index of the first item in the heap to swap
+         * @param index1 The index of the second item in the heap to swap
+         */
+        private void swap(int index0, int index1) {
+            // The position of the vertex located at index0 in heap := position of vertex at index1 in heap
+            this.pos[this.heap[index0]] = index1;
+            this.pos[this.heap[index1]] = index0;
+            // The value of the key located at index0 in heap := value of key at index1 in heap
+            int temp = this.heap[index1];
+            this.heap[index1] = this.heap[index0];
+            this.heap[index0] = temp;
+        }
     }
     
 }

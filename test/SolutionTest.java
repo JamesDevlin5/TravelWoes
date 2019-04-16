@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * A testing class for the solution to the travel woes problem
@@ -16,7 +17,7 @@ class SolutionTest {
     /**
      * Boolean values indicating whether to test certain groupings
      */
-    private final boolean testProvided = false;
+    private final boolean testProvided = true;
     
     /**
      * The test values provided in the question
@@ -92,7 +93,7 @@ class SolutionTest {
             testString
                     .append(test[0][0]).append(" ")             // |V|
                     .append(test[0][1]).append("\n");           // |E|
-            for (int r = 1; r < test[0][1]; r++) {              // for i := 1 ... |E|
+            for (int r = 1; r < test[0][1] + 1; r++) {              // for i := 1 ... |E|
                 testString.append(test[r][0]).append(" ")       // src
                         .append(test[r][1]).append(" ")         // dst
                         .append(test[r][2]).append("\n");       // cost
@@ -100,35 +101,10 @@ class SolutionTest {
             testString
                     .append(test[test.length - 1][0]).append(" ")
                     .append(test[test.length - 1][1]);
-            assertEquals(resultIter.next(),
-                    new Solution(new ByteArrayInputStream(
-                            testString.toString().getBytes()
-                    )).shortestPath()
-            );
-        }
-    }
-
-    @Test
-    void swapTest() {
-        int[][] test1 = new int[][]{
-                {1, 2, 3},
-                {4, 5, 6},
-                {7, 8, 9},
-                {-1, -2, -3}
-        };
-        Solution.swap(test1, 1, 3);
-        for (int r = 0; r < 4; r++) {
-            for (int c = 0; c < 3; c++) {
-                assertEquals(
-                        test1[r][c],
-                        new int[][]{
-                                {1, 2, 3},
-                                {-1, -2, -3},
-                                {7, 8, 9},
-                                {4, 5, 6}
-                        }[r][c]
-                );
-            }
+            Solution solution = new Solution();
+            solution.parseInput(new ByteArrayInputStream(testString.toString().getBytes()));
+            assertTrue(resultIter.hasNext());
+            assertEquals(resultIter.next(), solution.shortestPath());
         }
     }
 }
