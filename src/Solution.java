@@ -27,7 +27,9 @@ class Solution {
      * @param args The provided command line arguments, assumed to be none for this project
      */
     public static void main(String[] args) {
-        System.out.print(new Solution().shortestPath());
+        Solution solution = new Solution();
+        solution.parseInput(System.in);
+        System.out.print(solution.shortestPath());
     }
     
     /**
