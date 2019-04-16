@@ -1,4 +1,4 @@
-import java.io.InputStream;
+import java.io.*;
 import java.util.Scanner;
 
 /**
@@ -96,16 +96,18 @@ class Solution {
         // The first line of arguments
         this.numV = input.nextInt(); // |V|
         this.numE = input.nextInt(); // |E|
+        input.nextLine();
         this.adjacencyList = new ConsList[this.numV + 1];
         // The following |routes| lines of arguments, describing each route
         for (int i = 0; i < this.numE; i++) {
-            int src = input.skip("\n").nextInt();
+            int src = input.nextInt();
             int dst = input.nextInt();
             int cost = input.nextInt();
             this.addEdge(this.adjacencyList, src, dst, cost);
+            input.nextLine();
         }
         // The final line of arguments, describing the goal
-        this.source = input.skip("\n").nextInt();
+        this.source = input.nextInt();
         this.target = input.nextInt();
     }
     
