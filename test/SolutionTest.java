@@ -27,6 +27,15 @@ class SolutionTest {
     private Integer[][] provided3;
     private Integer[][] provided4;
     
+    private Integer[][] simple1;
+    private Integer[][] simple2;
+    
+    private Integer[][] allSame1;
+    private Integer[][] allSame2;
+    
+    private Integer[][] oob1;
+    private Integer[][] oob2;
+    
     @BeforeEach
     void setUp() {
         this.provided1 = new Integer[][]{
@@ -70,6 +79,50 @@ class SolutionTest {
                 {3, 4, 4},
                 {1, 5}
         };
+        this.simple1 = new Integer[][]{
+                {1, 1},
+                {1, 1, 6},
+                {1, 1}
+        };
+        this.simple2 = new Integer[][]{
+                {2, 1},
+                {1, 2, 10},
+                {1, 2}
+        };
+        this.allSame1 = new Integer[][]{
+                {10, 10},
+                {1, 2, 10},
+                {2, 3, 10},
+                {3, 4, 10},
+                {4, 5, 10},
+                {5, 6, 10},
+                {6, 7, 10},
+                {7, 8, 10},
+                {8, 9, 10},
+                {9, 10, 10},
+                {10, 1, 10},
+                {1, 10}
+        };
+        this.allSame2 = new Integer[][]{
+                {7, 6},
+                {1, 2, 1},
+                {1, 3, 1},
+                {1, 4, 1},
+                {1, 5, 1},
+                {1, 6, 1},
+                {1, 7, 1},
+                {1, 7}
+        };
+        this.oob1 = new Integer[][]{
+                {3, 1},
+                {1, 2, 8},
+                {1, 4}
+        };
+        this.oob2 = new Integer[][]{
+                {3, 1},
+                {2, 3, 100},
+                {0, 2}
+        };
     }
     
     @Test
@@ -86,6 +139,18 @@ class SolutionTest {
             tests.add(this.provided4);
             results.add(6);
         }
+        tests.add(this.simple1);
+        results.add(0);
+        tests.add(this.simple2);
+        results.add(10);
+        tests.add(this.allSame1);
+        results.add(90);
+        tests.add(this.allSame2);
+        results.add(1);
+        tests.add(this.oob1);
+        results.add(-1);
+        tests.add(this.oob2);
+        results.add(-1);
         
         Iterator<Integer> resultIter = results.iterator();
         for (Integer[][] test : tests) {

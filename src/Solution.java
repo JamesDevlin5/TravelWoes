@@ -36,6 +36,14 @@ class Solution {
      * @return The cost of the minimum path between source and target
      */
     int shortestPath() {
+        // Check edge case of |V| = 1
+        if (this.source == this.target) {
+            return 0;
+        }
+        else if (this.source < 1 || this.target < 1
+                         || this.numV < this.source || this.numV < this.target) {
+            return -1;
+        }
         // Initialize the heap
         this.heap = new MinHeap(this.numV);
         this.heap.initHeap(this.source);
