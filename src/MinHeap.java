@@ -17,9 +17,6 @@ public class MinHeap {
     private int[] key;
     // pos[i] = vertex (i) -> position in heap
     private int[] pos;
-    
-    // The size that was allocated for this heap, the maximum number of elements possible
-    private int allocatedSize;
     // The number of elements currently stored in the heap
     private int heapSize;
     
@@ -30,13 +27,11 @@ public class MinHeap {
      */
     public MinHeap(int size) {
         // Ensure that the integer arrays may all store |V| values
-        this.heap = new int[size];
-        this.key = new int[size];
-        this.pos = new int[size];
-        // The integer arrays may hold at most size values
-        this.allocatedSize = size;
+        this.heap = new int[size + 1];
+        this.key = new int[size + 1];
+        this.pos = new int[size + 1];
         // There are |V| nodes in the heap, initially
-        this.heapSize = size - 1;
+        this.heapSize = size;
     }
     
     /**
@@ -82,20 +77,58 @@ public class MinHeap {
     }
     
     /**
+     * A utility function which bubbles a node up the heap
+     *
+     * @param position The position in the heap of the item to be bubbled up
+     */
+    private void bubbleUp(int position) {
+        while (position > 1 && this.getKey(this.heap[position]) < this.getKey(this.heap[position / 2])) {
+            this.swap(position, position / 2);
+            position = position / 2;
+        }
+    }
+    
+    /**
      * Extracts the minimum value from the heap, indicating the cheapest next-vertex which may be routed
      *
      * @return The integer identity of the vertex with the next cheapest route
      */
     public int extractMin() {
         // The next minimum cost path will be the root node
-        int minVertex = this.heap[0];
+        int minVertex = this.heap[1];
         // Swap the root node and the last leaf node
-        this.swap(0, heapSize);
+        this.swap(1, this.heapSize);
         // The node removed will now be out of scope
         this.heapSize--;
         // Ensure root node is now correct
-        this.bubbleDown(0);
+        this.bubbleDown(1);
         return minVertex;
+    }
+    
+    /**
+     * A utility function which bubbles a node down the heap
+     *
+     * @param position The position in the heap of the item to be bubbled down
+     */
+    private void bubbleDown(int position) {
+        while (position * 2 <= this.size()) {
+            int minChild;
+            if (position * 2 < this.size()
+                        && this.key[this.heap[position * 2]] > this.key[this.heap[position * 2 + 1]])
+            {
+                minChild = position * 2 + 1;
+            }
+            else {
+                minChild = position * 2;
+            }
+            if (this.key[this.heap[position]] > this.key[this.heap[minChild]]) {
+                this.swap(position, minChild);
+                position = minChild;
+            }
+            else {
+                break;
+            }
+        }
     }
     
     /**
@@ -105,7 +138,7 @@ public class MinHeap {
      */
     public void initHeap(int source) {
         // Iterate all vertices
-        for (int i = 0; i < this.heapSize; i++) {
+        for (int i = 1; i <= this.heapSize; i++) {
             // vertex i is located a position i for all vertices, initially
             this.heap[i] = i;
             this.pos[i] = i;
@@ -115,7 +148,7 @@ public class MinHeap {
         // The source should be selected initially, with a weight of 0
         this.key[source] = 0;
         // Ensure that the source is in the correct position
-        this.swap(0, source);
+        this.swap(1, source);
     }
     
     /**
