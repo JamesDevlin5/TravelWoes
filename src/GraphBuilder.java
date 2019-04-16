@@ -14,7 +14,7 @@ public class GraphBuilder {
     
     void setNumV(int vertices) {
         this.numV = vertices;
-        this.edges = new ConsList[vertices];
+        this.edges = new ConsList[vertices + 1];
     }
     
     void setNumE(int edges) {
@@ -41,14 +41,14 @@ public class GraphBuilder {
         this.setNumE(input.nextInt()); // |E|
         // The following |routes| lines of arguments, describing each route
         for (int i = 0; i < this.numE; i++) {
-            int src = input.skip("\n").nextInt() - 1;
-            int dst = input.nextInt() - 1;
+            int src = input.skip("\n").nextInt();
+            int dst = input.nextInt();
             int cost = input.nextInt();
             this.addEdge(src, dst, cost);
         }
         // The final line of arguments, describing the goal
-        this.setSource(input.skip("\n").nextInt() - 1);
-        this.setTarget(input.nextInt() - 1);
+        this.setSource(input.skip("\n").nextInt());
+        this.setTarget(input.nextInt());
     }
     
 }
