@@ -3,6 +3,8 @@ import java.util.Scanner;
 
 /**
  * A class which runs the program, providing the solution
+ * 
+ * TODO: Make arr[0] := size of array
  */
 class Solution {
     
